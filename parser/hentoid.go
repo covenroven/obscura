@@ -121,7 +121,6 @@ func (d hentoidDescriptor) toMetadata() metadata.Book {
 	case "EHENTAI", "EXHENTAI":
 		// remove all bracketed text in the title
 		re := regexp.MustCompile(`\s*[\(\[\{][^\]\}]*[\)\]\}]\s*`)
-		// re := regexp.MustCompile(`[\[\(\{][^\[\]\(\)\{\}]*[\]\)\}]`)
 		cleanedTitle := strings.TrimSpace(re.ReplaceAllString(md.Title, " "))
 		md.Title = cleanedTitle
 
@@ -131,6 +130,7 @@ func (d hentoidDescriptor) toMetadata() metadata.Book {
 			t = strings.ReplaceAll(t, "female:", "")
 			t = strings.ReplaceAll(t, "male:", "")
 			t = strings.ReplaceAll(t, "mixed:", "")
+			t = strings.ReplaceAll(t, "other:", "")
 			tags = append(tags, t)
 		}
 		md.Tags = tags

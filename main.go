@@ -35,8 +35,6 @@ func main() {
 	}
 }
 
-// scan dir -> read .json -> create metadata -> write .xml -> repack cbz
-
 func Repack() error {
 	g, ctx := errgroup.WithContext(context.Background())
 
