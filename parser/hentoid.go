@@ -26,6 +26,10 @@ const (
 	formatOneShot = "One-Shot"
 )
 
+var (
+	errHentoidDescriptorNotFound = errors.New("hentoid: file descriptor not found")
+)
+
 type (
 	hentoidStdObject struct {
 		Name string `json:"name"`
@@ -64,6 +68,10 @@ func NewHentoidParser() Parser {
 func (p *HentoidParser) Parse(ctx context.Context, dir *ParsableDir) (*metadata.Book, error) {
 	desc, err := p.getDescriptor(dir)
 	if err != nil {
+		if errors.Is(err, errHentoidDescriptorNotFound) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -81,9 +89,8 @@ func (p *HentoidParser) getDescriptor(dir *ParsableDir) (*hentoidDescriptor, err
 		}
 	}
 
-	log.Println("descfile found:", descFile.Name())
 	if descFile == nil {
-		return nil, errors.New("hentoid: file descriptor not found")
+		return nil, errHentoidDescriptorNotFound
 	}
 
 	content, err := os.ReadFile(fmt.Sprintf("%s/%s", dir.Name, descFile.Name()))
@@ -103,7 +110,7 @@ func (p *HentoidParser) getDescriptor(dir *ParsableDir) (*hentoidDescriptor, err
 
 func (d hentoidDescriptor) toMetadata() metadata.Book {
 	md := metadata.Book{
-		Title:        d.Title,
+		Title:        cleanText(d.Title),
 		PageCount:    uint32(d.QtyPages),
 		Tags:         d.Attributes.Tags.ExtractName(false),
 		URLs:         []string{d.FullURL()},

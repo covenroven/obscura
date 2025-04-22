@@ -74,6 +74,11 @@ func processDir(ctx context.Context, dir string) error {
 
 	for _, f := range files {
 		g.Go(func() error {
+			// no-op for files
+			if !f.IsDir() {
+				return nil
+			}
+
 			return processDir(ctx, fmt.Sprintf("%s/%s", dir, f.Name()))
 		})
 	}
@@ -91,7 +96,13 @@ func identifyAndPack(ctx context.Context, dirName string, files []os.DirEntry) e
 	dir := parser.NewParsableDir(dirName, files)
 	md, err := parser.Parse(ctx, source, dir)
 	if err != nil {
+		log.Println("skipping", dirName)
 		return err
+	}
+
+	// ignore invalid metadata
+	if md == nil {
+		return nil
 	}
 
 	formattedMD, err := formatter.Format(ctx, format, md)

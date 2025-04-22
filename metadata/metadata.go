@@ -36,13 +36,30 @@ func (b Book) LocalizedSeries() (series, locSeries string) {
 	return localized(b.Series)
 }
 
-// GetPrimaryAuthor fetches the first publisher/circle with circle as priority
+// GetPrimaryAuthor fetches the first author with
+// publisher/circle as alternative
 func (a Author) GetPrimaryAuthor() (author string) {
 	if len(a.Artists) > 0 {
 		author = a.Artists[0]
 
 		// discard alternative name
 		author, _ = localized(author)
+	}
+
+	if author != "" {
+		return
+	}
+
+	// use circle/publisher as alternative
+	if len(a.Publishers) > 0 {
+		author = a.Publishers[0]
+	}
+	if len(a.Circles) > 0 {
+		author = a.Circles[0]
+	}
+
+	if author == "" {
+		author = "[unknown]"
 	}
 
 	return
